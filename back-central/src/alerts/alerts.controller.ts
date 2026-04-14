@@ -12,7 +12,7 @@ export class AlertsController {
   @ApiOperation({
     summary: 'Lister les alertes actives',
     description:
-      "Retourne les alertes detectees par le siege: conditions hors plage ou stockage superieur a 365 jours. Cet endpoint sert a prioriser les actions de supervision et de traitement des risques.",
+      'Retourne les alertes detectees par le siege: conditions hors plage ou stockage superieur a 365 jours. Cet endpoint sert a prioriser les actions de supervision et de traitement des risques.',
   })
   @ApiOkResponse({
     description: 'Liste des alertes calculees a partir des donnees mockees.',

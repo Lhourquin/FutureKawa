@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { LotDetailDto } from './dto/lot-detail.dto';
 import { MeasurementHistoryItemDto } from './dto/measurement-history-item.dto';
+import { BrazilBackendClient } from '../shared/clients/brazil-backend.client';
 import { CLOCK, ClockRepository } from '../shared/repositories/clock.repository';
 import {
   COUNTRY_REPOSITORY,
@@ -26,10 +27,15 @@ export class LotsService {
     @Inject(MEASUREMENT_REPOSITORY)
     private readonly measurementRepository: MeasurementRepository,
     @Inject(CLOCK) private readonly clockRepository: ClockRepository,
+    private readonly brazilBackendClient: BrazilBackendClient,
     private readonly monitoringService: MonitoringService,
   ) {}
 
   async getLotDetail(lotId: string): Promise<LotDetailDto> {
+    if (lotId.startsWith('lot-br-')) {
+      return this.brazilBackendClient.getLotDetail(lotId);
+    }
+
     const lot = await this.lotRepository.findById(lotId);
     if (!lot) {
       throw new NotFoundException(`Lot ${lotId} not found`);
@@ -67,6 +73,10 @@ export class LotsService {
   }
 
   async getMeasurements(lotId: string): Promise<MeasurementHistoryItemDto[]> {
+    if (lotId.startsWith('lot-br-')) {
+      return this.brazilBackendClient.getMeasurements(lotId);
+    }
+
     const lot = await this.lotRepository.findById(lotId);
     if (!lot) {
       throw new NotFoundException(`Lot ${lotId} not found`);

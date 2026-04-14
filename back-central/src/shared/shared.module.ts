@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { BrazilBackendClient } from './clients/brazil-backend.client';
 import { MonitoringService } from './services/monitoring.service';
 import { CLOCK } from './repositories/clock.repository';
 import { COUNTRY_REPOSITORY } from './repositories/country.repository';
@@ -12,6 +13,7 @@ import { SystemClockProvider } from './providers/system-clock.provider';
 @Global()
 @Module({
   providers: [
+    BrazilBackendClient,
     MonitoringService,
     InMemoryCountryRepository,
     InMemoryLotRepository,
@@ -35,6 +37,7 @@ import { SystemClockProvider } from './providers/system-clock.provider';
     },
   ],
   exports: [
+    BrazilBackendClient,
     MonitoringService,
     COUNTRY_REPOSITORY,
     LOT_REPOSITORY,

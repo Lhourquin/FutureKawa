@@ -4,6 +4,7 @@ import { CountryOverviewDto } from './dto/country-overview.dto';
 import { LotSummaryDto } from './dto/lot-summary.dto';
 import { CountryCode } from '../shared/enums/country-code.enum';
 import { Country } from '../shared/models/country.model';
+import { BrazilBackendClient } from '../shared/clients/brazil-backend.client';
 import { CLOCK, ClockRepository } from '../shared/repositories/clock.repository';
 import {
   COUNTRY_REPOSITORY,
@@ -29,6 +30,7 @@ export class CountriesService {
     @Inject(MEASUREMENT_REPOSITORY)
     private readonly measurementRepository: MeasurementRepository,
     @Inject(CLOCK) private readonly clockRepository: ClockRepository,
+    private readonly brazilBackendClient: BrazilBackendClient,
     private readonly monitoringService: MonitoringService,
   ) {}
 
@@ -84,6 +86,10 @@ export class CountriesService {
   }
 
   async getLotsByCountry(countryCode: CountryCode): Promise<LotSummaryDto[]> {
+    if (countryCode === CountryCode.BR) {
+      return this.brazilBackendClient.getLots();
+    }
+
     const country = await this.getCountryOrFail(countryCode);
     const lots = await this.lotRepository.findByCountryCode(countryCode);
     const now = this.clockRepository.now();

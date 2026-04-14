@@ -1,8 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AlertDto } from './dto/alert.dto';
+import { BrazilBackendClient } from '../shared/clients/brazil-backend.client';
 import { AlertSeverity } from '../shared/enums/alert-severity.enum';
 import { AlertType } from '../shared/enums/alert-type.enum';
-import { CLOCK, ClockRepository } from '../shared/repositories/clock.repository';
+import { CountryCode } from '../shared/enums/country-code.enum';
+import {
+  CLOCK,
+  ClockRepository,
+} from '../shared/repositories/clock.repository';
 import {
   COUNTRY_REPOSITORY,
   CountryRepository,
@@ -27,17 +32,25 @@ export class AlertsService {
     @Inject(MEASUREMENT_REPOSITORY)
     private readonly measurementRepository: MeasurementRepository,
     @Inject(CLOCK) private readonly clockRepository: ClockRepository,
+    private readonly brazilBackendClient: BrazilBackendClient,
     private readonly monitoringService: MonitoringService,
   ) {}
 
   async getAlerts(): Promise<AlertDto[]> {
     const countries = await this.countryRepository.findAll();
+    const remoteBrazilAlerts = await this.brazilBackendClient.getAlerts();
     const lots = await this.lotRepository.findAll();
     const now = this.clockRepository.now();
-    const countriesByCode = new Map(countries.map((country) => [country.code, country]));
+    const countriesByCode = new Map(
+      countries.map((country) => [country.code, country]),
+    );
     const alerts: AlertDto[] = [];
 
     for (const lot of lots) {
+      if (lot.countryCode === CountryCode.BR) {
+        continue;
+      }
+
       const country = countriesByCode.get(lot.countryCode);
       if (!country) {
         continue;
@@ -83,6 +96,15 @@ export class AlertsService {
       }
     }
 
-    return alerts.sort((left, right) => right.detectedAt.localeCompare(left.detectedAt));
+    const brazilCountry = countriesByCode.get(CountryCode.BR);
+    const normalizedBrazilAlerts = remoteBrazilAlerts.map((alert) => ({
+      ...alert,
+      countryCode: brazilCountry?.code ?? CountryCode.BR,
+      countryName: brazilCountry?.name ?? 'Bresil',
+    }));
+
+    return [...normalizedBrazilAlerts, ...alerts].sort((left, right) =>
+      right.detectedAt.localeCompare(left.detectedAt),
+    );
   }
 }

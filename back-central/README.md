@@ -2,12 +2,13 @@
 
 Premiere iteration du backend central NestJS pour le siege FutureKawa.
 
-Cette version utilise uniquement des donnees mockees en memoire avec une separation claire entre:
+Cette version utilise uniquement des donnees mockees en memoire avec une structure NestJS simple par modules:
 
-- `domain`
-- `application`
-- `infrastructure`
-- `presentation`
+- `health`
+- `countries`
+- `lots`
+- `alerts`
+- `shared`
 
 ## Endpoints disponibles
 
@@ -41,14 +42,15 @@ Serveur:
 
 - `http://localhost:3000/api`
 
-## Structure
+## Structure simplifiee
 
 ```text
 src/
-  application/
-  domain/
-  infrastructure/
-  presentation/
+  health/
+  countries/
+  lots/
+  alerts/
+  shared/
 ```
 
 ## Notes
@@ -57,3 +59,10 @@ Les alertes exposees par `GET /api/alerts` couvrent:
 
 - les conditions hors plage
 - les lots stockes depuis plus de 365 jours
+
+Le dossier `shared` contient uniquement ce qui est utile a plusieurs modules:
+
+- enums et modeles
+- repositories abstraits
+- implementations in-memory
+- service commun de monitoring
