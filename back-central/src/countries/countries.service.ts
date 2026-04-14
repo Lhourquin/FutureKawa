@@ -1,41 +1,25 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CountryDto } from './dto/country.dto';
 import { CountryOverviewDto } from './dto/country-overview.dto';
 import { LotSummaryDto } from './dto/lot-summary.dto';
 import { CountryCode } from '../shared/enums/country-code.enum';
 import { Country } from '../shared/models/country.model';
 import { BrazilBackendClient } from '../shared/clients/brazil-backend.client';
-import { CLOCK, ClockRepository } from '../shared/repositories/clock.repository';
-import {
-  COUNTRY_REPOSITORY,
-  CountryRepository,
-} from '../shared/repositories/country.repository';
-import {
-  LOT_REPOSITORY,
-  LotRepository,
-} from '../shared/repositories/lot.repository';
-import {
-  MEASUREMENT_REPOSITORY,
-  MeasurementRepository,
-} from '../shared/repositories/measurement.repository';
-import { MonitoringService } from '../shared/services/monitoring.service';
+import { CountryCatalogService } from '../shared/services/country-catalog.service';
 
 @Injectable()
 export class CountriesService {
   constructor(
-    @Inject(COUNTRY_REPOSITORY)
-    private readonly countryRepository: CountryRepository,
-    @Inject(LOT_REPOSITORY)
-    private readonly lotRepository: LotRepository,
-    @Inject(MEASUREMENT_REPOSITORY)
-    private readonly measurementRepository: MeasurementRepository,
-    @Inject(CLOCK) private readonly clockRepository: ClockRepository,
+    private readonly countryCatalogService: CountryCatalogService,
     private readonly brazilBackendClient: BrazilBackendClient,
-    private readonly monitoringService: MonitoringService,
   ) {}
 
   async getCountries(): Promise<CountryDto[]> {
-    const countries = await this.countryRepository.findAll();
+    const countries = this.countryCatalogService.getAll();
     return countries.map((country) => ({
       code: country.code,
       name: country.name,
@@ -47,7 +31,7 @@ export class CountriesService {
   }
 
   async getCountryOverview(countryCode: CountryCode): Promise<CountryOverviewDto> {
-    const country = await this.getCountryOrFail(countryCode);
+    const country = this.getCountryOrFail(countryCode);
     const lots = await this.getLotsByCountry(countryCode);
     const latestValues = lots.filter(
       (lot) => lot.latestTemperatureC !== null && lot.latestHumidityPercent !== null,
@@ -90,38 +74,13 @@ export class CountriesService {
       return this.brazilBackendClient.getLots();
     }
 
-    const country = await this.getCountryOrFail(countryCode);
-    const lots = await this.lotRepository.findByCountryCode(countryCode);
-    const now = this.clockRepository.now();
-
-    const summaries = await Promise.all(
-      lots.map(async (lot) => {
-        const latestMeasurement =
-          await this.measurementRepository.findLatestByLotId(lot.id);
-
-        return {
-          id: lot.id,
-          reference: lot.reference,
-          countryCode: lot.countryCode,
-          productName: lot.productName,
-          producer: lot.producer,
-          quantityKg: lot.quantityKg,
-          storedAt: lot.storedAt,
-          storageDays: this.monitoringService.computeStorageDays(lot.storedAt, now),
-          latestTemperatureC: latestMeasurement?.temperatureC ?? null,
-          latestHumidityPercent: latestMeasurement?.humidityPercent ?? null,
-          conditionsInRange: latestMeasurement
-            ? this.monitoringService.isWithinRange(latestMeasurement, country)
-            : null,
-        };
-      }),
+    throw new BadGatewayException(
+      `Country backend ${countryCode} is not available yet`,
     );
-
-    return summaries.sort((left, right) => left.reference.localeCompare(right.reference));
   }
 
-  private async getCountryOrFail(countryCode: CountryCode): Promise<Country> {
-    const country = await this.countryRepository.findByCode(countryCode);
+  private getCountryOrFail(countryCode: CountryCode): Country {
+    const country = this.countryCatalogService.getByCode(countryCode);
     if (!country) {
       throw new NotFoundException(`Country ${countryCode} not found`);
     }

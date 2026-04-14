@@ -1,36 +1,15 @@
 import { Global, Module } from '@nestjs/common';
 import { BrazilBackendClient } from './clients/brazil-backend.client';
-import { MonitoringService } from './services/monitoring.service';
-import { CLOCK } from './repositories/clock.repository';
-import { COUNTRY_REPOSITORY } from './repositories/country.repository';
-import { LOT_REPOSITORY } from './repositories/lot.repository';
-import { MEASUREMENT_REPOSITORY } from './repositories/measurement.repository';
-import { InMemoryCountryRepository } from './repositories/in-memory-country.repository';
-import { InMemoryLotRepository } from './repositories/in-memory-lot.repository';
-import { InMemoryMeasurementRepository } from './repositories/in-memory-measurement.repository';
+import { CountryCatalogService } from './services/country-catalog.service';
 import { SystemClockProvider } from './providers/system-clock.provider';
+import { CLOCK } from './repositories/clock.repository';
 
 @Global()
 @Module({
   providers: [
     BrazilBackendClient,
-    MonitoringService,
-    InMemoryCountryRepository,
-    InMemoryLotRepository,
-    InMemoryMeasurementRepository,
+    CountryCatalogService,
     SystemClockProvider,
-    {
-      provide: COUNTRY_REPOSITORY,
-      useExisting: InMemoryCountryRepository,
-    },
-    {
-      provide: LOT_REPOSITORY,
-      useExisting: InMemoryLotRepository,
-    },
-    {
-      provide: MEASUREMENT_REPOSITORY,
-      useExisting: InMemoryMeasurementRepository,
-    },
     {
       provide: CLOCK,
       useExisting: SystemClockProvider,
@@ -38,10 +17,7 @@ import { SystemClockProvider } from './providers/system-clock.provider';
   ],
   exports: [
     BrazilBackendClient,
-    MonitoringService,
-    COUNTRY_REPOSITORY,
-    LOT_REPOSITORY,
-    MEASUREMENT_REPOSITORY,
+    CountryCatalogService,
     CLOCK,
   ],
 })

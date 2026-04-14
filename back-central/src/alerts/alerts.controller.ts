@@ -15,7 +15,7 @@ export class AlertsController {
       'Retourne les alertes detectees par le siege: conditions hors plage ou stockage superieur a 365 jours. Cet endpoint sert a prioriser les actions de supervision et de traitement des risques.',
   })
   @ApiOkResponse({
-    description: 'Liste des alertes calculees a partir des donnees mockees.',
+    description: "Liste des alertes agregees depuis les backends pays disponibles.",
     type: AlertDto,
     isArray: true,
   })
