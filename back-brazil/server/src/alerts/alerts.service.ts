@@ -2,8 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AlertDto } from './dto/alert.dto';
 import { AlertSeverity } from '../shared/enums/alert-severity.enum';
 import { AlertType } from '../shared/enums/alert-type.enum';
-import { CLOCK, ClockRepository } from '../shared/repositories/clock.repository';
-import { LOT_REPOSITORY, LotRepository } from '../shared/repositories/lot.repository';
+import {
+  CLOCK,
+  ClockRepository,
+} from '../shared/repositories/clock.repository';
+import {
+  LOT_REPOSITORY,
+  LotRepository,
+} from '../shared/repositories/lot.repository';
 import {
   MEASUREMENT_REPOSITORY,
   MeasurementRepository,
@@ -63,6 +69,8 @@ export class AlertsService {
       }
     }
 
-    return alerts.sort((left, right) => right.detectedAt.localeCompare(left.detectedAt));
+    return alerts.sort((left, right) =>
+      right.detectedAt.localeCompare(left.detectedAt),
+    );
   }
 }

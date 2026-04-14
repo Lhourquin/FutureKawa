@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BRAZIL_TARGETS } from '../data/mock-data';
+import { BRAZIL_STORAGE_TARGETS } from '../config/brazil-storage.config';
 import { Measurement } from '../models/measurement.model';
 
 @Injectable()
@@ -12,13 +12,17 @@ export class MonitoringService {
 
   isWithinBrazilRange(measurement: Measurement): boolean {
     const minTemperature =
-      BRAZIL_TARGETS.targetTemperatureC - BRAZIL_TARGETS.temperatureToleranceC;
+      BRAZIL_STORAGE_TARGETS.targetTemperatureC -
+      BRAZIL_STORAGE_TARGETS.temperatureToleranceC;
     const maxTemperature =
-      BRAZIL_TARGETS.targetTemperatureC + BRAZIL_TARGETS.temperatureToleranceC;
+      BRAZIL_STORAGE_TARGETS.targetTemperatureC +
+      BRAZIL_STORAGE_TARGETS.temperatureToleranceC;
     const minHumidity =
-      BRAZIL_TARGETS.targetHumidityPercent - BRAZIL_TARGETS.humidityTolerancePercent;
+      BRAZIL_STORAGE_TARGETS.targetHumidityPercent -
+      BRAZIL_STORAGE_TARGETS.humidityTolerancePercent;
     const maxHumidity =
-      BRAZIL_TARGETS.targetHumidityPercent + BRAZIL_TARGETS.humidityTolerancePercent;
+      BRAZIL_STORAGE_TARGETS.targetHumidityPercent +
+      BRAZIL_STORAGE_TARGETS.humidityTolerancePercent;
 
     return (
       measurement.temperatureC >= minTemperature &&
