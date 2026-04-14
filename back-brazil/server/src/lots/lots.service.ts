@@ -1,6 +1,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CLOCK, ClockRepository } from '../shared/repositories/clock.repository';
-import { LOT_REPOSITORY, LotRepository } from '../shared/repositories/lot.repository';
+import {
+  CLOCK,
+  ClockRepository,
+} from '../shared/repositories/clock.repository';
+import {
+  LOT_REPOSITORY,
+  LotRepository,
+} from '../shared/repositories/lot.repository';
 import {
   MEASUREMENT_REPOSITORY,
   MeasurementRepository,
@@ -40,7 +46,10 @@ export class LotsService {
           producer: lot.producer,
           quantityKg: lot.quantityKg,
           storedAt: lot.storedAt,
-          storageDays: this.monitoringService.computeStorageDays(lot.storedAt, now),
+          storageDays: this.monitoringService.computeStorageDays(
+            lot.storedAt,
+            now,
+          ),
           latestTemperatureC: latestMeasurement?.temperatureC ?? null,
           latestHumidityPercent: latestMeasurement?.humidityPercent ?? null,
           conditionsInRange: latestMeasurement
@@ -50,7 +59,9 @@ export class LotsService {
       }),
     );
 
-    return summaries.sort((left, right) => left.reference.localeCompare(right.reference));
+    return summaries.sort((left, right) =>
+      left.reference.localeCompare(right.reference),
+    );
   }
 
   async getLotDetail(lotId: string): Promise<LotDetailDto> {
