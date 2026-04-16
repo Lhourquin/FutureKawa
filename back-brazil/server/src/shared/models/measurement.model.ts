@@ -1,7 +1,8 @@
 export interface Measurement {
   readonly id: string;
   readonly lotId: string;
-  readonly measuredAt: string;
-  readonly temperatureC: number;
-  readonly humidityPercent: number;
+  readonly sensor: string;
+  readonly value: number;
+  readonly unit: string;
+  readonly receivedAt: string;
 }

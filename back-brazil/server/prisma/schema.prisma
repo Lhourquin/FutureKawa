@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Lot {
-  id            String        @id
+  id            String        @id @default(cuid())
   reference     String        @unique
   warehouseId   String
   warehouseName String
@@ -21,13 +21,31 @@ model Lot {
   measurements  Measurement[]
 }
 
+// Une Measurement = un relevé d'un capteur (temperature OU humidite).
+// Chaque message MQTT produit exactement une ligne.
 model Measurement {
-  id              String   @id
-  lotId           String
-  measuredAt      DateTime
-  temperatureC    Float
-  humidityPercent Float
-  lot             Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  lotId      String
+  sensor     String   // 'temperature' | 'humidity'
+  value      Float
+  unit       String   // 'C' | '%'
+  receivedAt DateTime @default(now())
+  lot        Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
 
-  @@index([lotId, measuredAt])
+  @@index([lotId, sensor, receivedAt])
+}
+
+// Trace brute des messages MQTT, conservée pour débogage.
+model SensorLog {
+  id         String   @id @default(cuid())
+  topic      String
+  country    String
+  warehouse  String
+  sensor     String
+  value      Float
+  unit       String
+  timeserie  Int
+  receivedAt DateTime @default(now())
+
+  @@index([country, warehouse, sensor, receivedAt])
 }
