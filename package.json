@@ -1,0 +1,21 @@
+{
+  "name": "futurekawa",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "install:all": "pnpm install --recursive",
+    "build:brazil":  "pnpm --filter back-brazil run build",
+    "build:central": "pnpm --filter back-central run build",
+    "build:frontend": "pnpm --filter futurekawa-frontend run build",
+    "build": "pnpm run build:brazil && pnpm run build:central && pnpm run build:frontend",
+    "test:brazil":  "pnpm --filter back-brazil run test",
+    "test:central": "pnpm --filter back-central run test",
+    "test": "pnpm run test:brazil && pnpm run test:central",
+    "start:brazil":  "pnpm --filter back-brazil run start:dev",
+    "start:central": "pnpm --filter back-central run start:dev",
+    "start:frontend": "pnpm --filter futurekawa-frontend run dev",
+    "db:push": "pnpm --filter back-brazil run prisma:db:push",
+    "db:seed": "pnpm --filter back-brazil run prisma:seed"
+  },
+  "engines": { "node": ">=20", "pnpm": ">=9" }
+}

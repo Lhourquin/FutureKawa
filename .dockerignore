@@ -1,0 +1,10 @@
+# Exclure les node_modules de tous les sous-projets (réinstallés dans le conteneur)
+**/node_modules
+**/dist
+**/.env
+**/coverage
+**/*.log
+
+# Exclure les projets qui ne font pas partie du build back-brazil
+back-central/
+frontend/
