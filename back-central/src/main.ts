@@ -9,9 +9,10 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('FutureKawa Back Central')
     .setDescription(
-      "API REST du siege FutureKawa. Cette documentation explique chaque endpoint en francais: ce qu'il retourne et pourquoi il existe dans le pilotage central des lots.",
+      "API REST du siege FutureKawa. Endpoints protégés par JWT Bearer sauf /health et /auth/login. Utilisez POST /auth/login pour obtenir un token.",
     )
     .setVersion('1.0.0')
+    .addBearerAuth()
     .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
@@ -21,6 +22,8 @@ async function bootstrap() {
     },
     customSiteTitle: 'FutureKawa API Docs',
   });
+
+  app.enableCors();
 
   await app.listen(process.env.PORT ?? 3000);
 }
