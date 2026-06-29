@@ -1,8 +1,8 @@
-# ✅ 2) Rapport — Conduite du changement
+Rapport — Conduite du changement
 
 ***
 
-# 2.1. Contexte
+# 1. Contexte
 
 La mise en place du SI FutureKawa implique un changement important :
 
@@ -22,7 +22,7 @@ Cela impacte fortement les habitudes
 
 ***
 
-# 2.2. Enjeux du changement
+# 2. Enjeux du changement
 
 ## Risques identifiés
 
@@ -41,7 +41,7 @@ Cela impacte fortement les habitudes
 
 ***
 
-# 2.3. Stratégie de conduite du changement
+# 3. Stratégie de conduite du changement
 
 Basée sur 4 axes :
 
@@ -126,7 +126,7 @@ Les utilisateurs deviennent acteurs du projet
 
 ***
 
-# 2.4. Moyens concrets à mettre en place
+# 4. Moyens concrets à mettre en place
 
 ## Support utilisateur
 
@@ -148,7 +148,7 @@ Les utilisateurs deviennent acteurs du projet
 
 ***
 
-# 2.5. Plan de déploiement recommandé
+# 5. Plan de déploiement recommandé
 
 ### Phase 1 — pilote (1 pays)
 
@@ -168,7 +168,7 @@ Les utilisateurs deviennent acteurs du projet
 
 ***
 
-# 2.6. Indicateurs de succès
+# 6. Indicateurs de succès
 
 * taux d’utilisation
 * réduction erreurs
@@ -178,7 +178,7 @@ Les utilisateurs deviennent acteurs du projet
 
 ***
 
-# 2.7. Préparation de la phase 2 (automatisation)
+# 7. Préparation de la phase 2 (automatisation)
 
 La conduite du changement anticipera :
 
