@@ -1,34 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { BRAZIL_STORAGE_TARGETS } from '../config/brazil-storage.config';
-import { Measurement } from '../models/measurement.model';
 
 @Injectable()
 export class MonitoringService {
   computeStorageDays(storedAt: string, now: Date): number {
-    const millisecondsPerDay = 1000 * 60 * 60 * 24;
-    const diffMs = now.getTime() - new Date(storedAt).getTime();
-    return Math.max(0, Math.floor(diffMs / millisecondsPerDay));
+    const msPerDay = 1000 * 60 * 60 * 24;
+    return Math.max(0, Math.floor((now.getTime() - new Date(storedAt).getTime()) / msPerDay));
   }
 
-  isWithinBrazilRange(measurement: Measurement): boolean {
-    const minTemperature =
-      BRAZIL_STORAGE_TARGETS.targetTemperatureC -
-      BRAZIL_STORAGE_TARGETS.temperatureToleranceC;
-    const maxTemperature =
-      BRAZIL_STORAGE_TARGETS.targetTemperatureC +
-      BRAZIL_STORAGE_TARGETS.temperatureToleranceC;
-    const minHumidity =
-      BRAZIL_STORAGE_TARGETS.targetHumidityPercent -
-      BRAZIL_STORAGE_TARGETS.humidityTolerancePercent;
-    const maxHumidity =
-      BRAZIL_STORAGE_TARGETS.targetHumidityPercent +
-      BRAZIL_STORAGE_TARGETS.humidityTolerancePercent;
-
+  isTemperatureInRange(temperatureC: number): boolean {
+    const { targetTemperatureC, temperatureToleranceC } = BRAZIL_STORAGE_TARGETS;
     return (
-      measurement.temperatureC >= minTemperature &&
-      measurement.temperatureC <= maxTemperature &&
-      measurement.humidityPercent >= minHumidity &&
-      measurement.humidityPercent <= maxHumidity
+      temperatureC >= targetTemperatureC - temperatureToleranceC &&
+      temperatureC <= targetTemperatureC + temperatureToleranceC
     );
+  }
+
+  isHumidityInRange(humidityPercent: number): boolean {
+    const { targetHumidityPercent, humidityTolerancePercent } = BRAZIL_STORAGE_TARGETS;
+    return (
+      humidityPercent >= targetHumidityPercent - humidityTolerancePercent &&
+      humidityPercent <= targetHumidityPercent + humidityTolerancePercent
+    );
+  }
+
+  // Renvoie null si l'une des deux valeurs est inconnue (capteur absent)
+  isWithinBrazilRange(temperatureC: number | null, humidityPercent: number | null): boolean | null {
+    if (temperatureC === null || humidityPercent === null) return null;
+    return this.isTemperatureInRange(temperatureC) && this.isHumidityInRange(humidityPercent);
   }
 }

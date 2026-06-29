@@ -79,6 +79,26 @@ export class CountriesService {
     );
   }
 
+  async getWarehouses(countryCode: CountryCode): Promise<unknown[]> {
+    if (countryCode === CountryCode.BR) return this.brazilBackendClient.getWarehouses();
+    throw new BadGatewayException(`Country backend ${countryCode} not available yet`);
+  }
+
+  async createLot(countryCode: CountryCode, data: unknown): Promise<unknown> {
+    if (countryCode === CountryCode.BR) return this.brazilBackendClient.createLot(data);
+    throw new BadGatewayException(`Country backend ${countryCode} not available yet`);
+  }
+
+  async updateLot(countryCode: CountryCode, lotId: string, data: unknown): Promise<unknown> {
+    if (countryCode === CountryCode.BR) return this.brazilBackendClient.updateLot(lotId, data);
+    throw new BadGatewayException(`Country backend ${countryCode} not available yet`);
+  }
+
+  async deleteLot(countryCode: CountryCode, lotId: string): Promise<void> {
+    if (countryCode === CountryCode.BR) return this.brazilBackendClient.deleteLot(lotId);
+    throw new BadGatewayException(`Country backend ${countryCode} not available yet`);
+  }
+
   private getCountryOrFail(countryCode: CountryCode): Country {
     const country = this.countryCatalogService.getByCode(countryCode);
     if (!country) {

@@ -1,0 +1,67 @@
+pipeline {
+  agent any
+
+  tools {
+    nodejs 'NodeJS-20'
+  }
+
+  environment {
+    PNPM_HOME = "${WORKSPACE}/.pnpm-store"
+  }
+
+  stages {
+
+    stage('Install') {
+      steps {
+        sh 'npm install -g pnpm@9'
+        sh 'pnpm install --frozen-lockfile'
+      }
+    }
+
+    stage('Build') {
+      parallel {
+        stage('back-brazil') {
+          steps { sh 'pnpm --filter back-brazil run build' }
+        }
+        stage('back-central') {
+          steps { sh 'pnpm --filter back-central run build' }
+        }
+        stage('frontend') {
+          steps { sh 'pnpm --filter futurekawa-frontend run build' }
+        }
+      }
+    }
+
+    stage('Test') {
+      parallel {
+        stage('Unit — back-brazil') {
+          steps { sh 'pnpm --filter back-brazil run test --passWithNoTests' }
+        }
+        stage('Unit — back-central') {
+          steps { sh 'pnpm --filter back-central run test --passWithNoTests' }
+        }
+      }
+    }
+
+    stage('Package') {
+      steps {
+        sh '''
+          mkdir -p dist
+          cp -r back-brazil/server/dist  dist/back-brazil
+          cp -r back-central/dist        dist/back-central
+          cp -r frontend/dist            dist/frontend
+          tar -czf futurekawa-$(git rev-parse --short HEAD).tar.gz dist/
+        '''
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'futurekawa-*.tar.gz', allowEmptyArchive: true
+      junit '**/coverage/junit.xml'
+    }
+    success { echo 'Build OK ✓' }
+    failure { echo 'Build FAILED ✗' }
+  }
+}

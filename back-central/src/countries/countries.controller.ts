@@ -1,11 +1,14 @@
-import { Controller, Get, Param, ParseEnumPipe } from '@nestjs/common';
 import {
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
+  Body, Controller, Delete, Get, HttpCode, Param, ParseEnumPipe, Patch, Post, UseGuards,
+} from '@nestjs/common';
+import {
+  ApiCreatedResponse, ApiNoContentResponse, ApiNotFoundResponse,
+  ApiOkResponse, ApiOperation, ApiParam, ApiTags,
 } from '@nestjs/swagger';
+import { CountryOwnerGuard } from '../auth/country-owner.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { WarehouseOverviewDto } from './dto/warehouse-overview.dto';
 import { CountryCode } from '../shared/enums/country-code.enum';
 import { CountriesService } from './countries.service';
 import { CountryDto } from './dto/country.dto';
@@ -81,5 +84,61 @@ export class CountriesController {
     countryCode: CountryCode,
   ): Promise<LotSummaryDto[]> {
     return this.countriesService.getLotsByCountry(countryCode);
+  }
+
+  @Get(':countryCode/warehouses')
+  @ApiOperation({ summary: "Vue consolidée des entrepôts d'un pays" })
+  @ApiParam({ name: 'countryCode', enum: CountryCode })
+  @ApiOkResponse({ type: WarehouseOverviewDto, isArray: true })
+  getWarehouses(
+    @Param('countryCode', new ParseEnumPipe(CountryCode)) countryCode: CountryCode,
+  ): Promise<unknown[]> {
+    return this.countriesService.getWarehouses(countryCode);
+  }
+
+  @Post(':countryCode/lots')
+  @HttpCode(201)
+  @Roles('operator')
+  @UseGuards(RolesGuard, CountryOwnerGuard)
+  @ApiOperation({ summary: 'Créer un lot pour un pays' })
+  @ApiParam({ name: 'countryCode', enum: CountryCode })
+  @ApiCreatedResponse()
+  createLot(
+    @Param('countryCode', new ParseEnumPipe(CountryCode)) countryCode: CountryCode,
+    @Body() body: unknown,
+  ): Promise<unknown> {
+    return this.countriesService.createLot(countryCode, body);
+  }
+
+  @Patch(':countryCode/lots/:lotId')
+  @Roles('operator')
+  @UseGuards(RolesGuard, CountryOwnerGuard)
+  @ApiOperation({ summary: 'Modifier un lot' })
+  @ApiParam({ name: 'countryCode', enum: CountryCode })
+  @ApiParam({ name: 'lotId' })
+  @ApiOkResponse()
+  @ApiNotFoundResponse()
+  updateLot(
+    @Param('countryCode', new ParseEnumPipe(CountryCode)) countryCode: CountryCode,
+    @Param('lotId') lotId: string,
+    @Body() body: unknown,
+  ): Promise<unknown> {
+    return this.countriesService.updateLot(countryCode, lotId, body);
+  }
+
+  @Delete(':countryCode/lots/:lotId')
+  @HttpCode(204)
+  @Roles('operator')
+  @UseGuards(RolesGuard, CountryOwnerGuard)
+  @ApiOperation({ summary: 'Supprimer un lot (cascade mesures IoT)' })
+  @ApiParam({ name: 'countryCode', enum: CountryCode })
+  @ApiParam({ name: 'lotId' })
+  @ApiNoContentResponse()
+  @ApiNotFoundResponse()
+  deleteLot(
+    @Param('countryCode', new ParseEnumPipe(CountryCode)) countryCode: CountryCode,
+    @Param('lotId') lotId: string,
+  ): Promise<void> {
+    return this.countriesService.deleteLot(countryCode, lotId);
   }
 }

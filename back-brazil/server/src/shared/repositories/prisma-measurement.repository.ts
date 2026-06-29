@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Measurement } from '../models/measurement.model';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Measurement } from '../models/measurement.model';
 import { MeasurementRepository } from './measurement.repository';
 
 @Injectable()
@@ -9,45 +9,35 @@ export class PrismaMeasurementRepository extends MeasurementRepository {
     super();
   }
 
-  async findByLotId(lotId: string): Promise<Measurement[]> {
-    const measurements = await this.prisma.measurement.findMany({
-      where: {
-        lotId,
-      },
-      orderBy: {
-        measuredAt: 'asc',
-      },
+  async findBySensor(lotId: string, sensor: string): Promise<Measurement[]> {
+    const rows = await this.prisma.measurement.findMany({
+      where: { lotId, sensor },
+      orderBy: { receivedAt: 'asc' },
     });
-
-    return measurements.map((measurement) => ({
-      id: measurement.id,
-      lotId: measurement.lotId,
-      measuredAt: measurement.measuredAt.toISOString(),
-      temperatureC: measurement.temperatureC,
-      humidityPercent: measurement.humidityPercent,
-    }));
+    return rows.map(this.toModel);
   }
 
-  async findLatestByLotId(lotId: string): Promise<Measurement | null> {
-    const measurement = await this.prisma.measurement.findFirst({
-      where: {
-        lotId,
-      },
-      orderBy: {
-        measuredAt: 'desc',
-      },
+  async findLatestBySensor(lotId: string, sensor: string): Promise<Measurement | null> {
+    const row = await this.prisma.measurement.findFirst({
+      where: { lotId, sensor },
+      orderBy: { receivedAt: 'desc' },
     });
+    return row ? this.toModel(row) : null;
+  }
 
-    if (!measurement) {
-      return null;
-    }
+  async create(data: { lotId: string; sensor: string; value: number; unit: string }): Promise<Measurement> {
+    const row = await this.prisma.measurement.create({ data });
+    return this.toModel(row);
+  }
 
+  private toModel(row: { id: string; lotId: string; sensor: string; value: number; unit: string; receivedAt: Date }): Measurement {
     return {
-      id: measurement.id,
-      lotId: measurement.lotId,
-      measuredAt: measurement.measuredAt.toISOString(),
-      temperatureC: measurement.temperatureC,
-      humidityPercent: measurement.humidityPercent,
+      id: row.id,
+      lotId: row.lotId,
+      sensor: row.sensor,
+      value: row.value,
+      unit: row.unit,
+      receivedAt: row.receivedAt.toISOString(),
     };
   }
 }

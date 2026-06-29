@@ -4,12 +4,15 @@ export class MeasurementHistoryItemDto {
   @ApiProperty()
   id!: string;
 
-  @ApiProperty({ description: 'Horodatage ISO de la mesure.' })
+  @ApiProperty({ description: "Type de capteur : 'temperature' ou 'humidity'." })
+  sensor!: string;
+
+  @ApiProperty({ description: 'Valeur relevée.' })
+  value!: number;
+
+  @ApiProperty({ description: "Unité : 'C' (Celsius) ou '%' (humidité)." })
+  unit!: string;
+
+  @ApiProperty({ description: 'Horodatage ISO de réception sur le nœud pays.' })
   measuredAt!: string;
-
-  @ApiProperty({ description: 'Temperature relevee en degres Celsius.' })
-  temperatureC!: number;
-
-  @ApiProperty({ description: "Humidite relevee en pourcentage." })
-  humidityPercent!: number;
 }
