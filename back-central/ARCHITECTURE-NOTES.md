@@ -1,9 +1,32 @@
-# Positionnement des flux d'ecriture
+# Architecture du backend central — positionnement des flux
 
-Dans notre prototype, le frontend siege est un outil de consultation et de supervision.  
-Le backend central joue un role d'agregateur: il interroge les backends pays et expose uniquement des endpoints `GET` au frontend.  
-Nous ne prevoyons donc pas de `POST`, `PATCH` ou `DELETE` exposes cote siege, car aucun client HTTP metier n'en a besoin dans le perimetre retenu.  
-Les ecritures de donnees ont lieu au niveau des backends pays, de maniere interne, apres reception des mesures IoT via MQTT ou via leurs traitements locaux.  
-Autrement dit, les creations et mises a jour existent bien dans le systeme, mais elles ne passent pas par des controllers REST d'ecriture dans cette phase de la MSPR.  
-Ce choix nous permet de rester alignes avec l'usage reel de la solution: le siege consulte, les pays produisent et maintiennent la donnee.  
-Si besoin, des endpoints d'ecriture pourront etre ajoutes plus tard dans les backends pays, sans remettre en cause l'architecture du backend central.
+## Rôle du backend central
+
+Le backend central est un **agrégateur et proxy** : il ne stocke aucune donnée métier et délègue
+toutes les opérations (lecture et écriture) aux nœuds pays via leurs clients HTTP dédiés
+(ex. `BrazilBackendClient`).
+
+## Endpoints exposés
+
+Le backend central expose des endpoints **GET et d'écriture (POST/PATCH/DELETE)** au frontend :
+
+- **GET** — consultation : lots FIFO, mesures, alertes, entrepôts
+- **POST** — création de lots (proxifié vers le nœud pays concerné)
+- **PATCH** — modification de lots (proxifié vers le nœud pays concerné)
+- **DELETE** — suppression de lots (proxifié vers le nœud pays concerné)
+
+L'interface React (page *Gestion des stocks*) utilise ces endpoints pour permettre aux
+opérateurs de créer et modifier des lots sans accès direct aux nœuds pays.
+
+## Flux d'écriture
+
+```
+Frontend (React)
+  → POST/PATCH/DELETE /api/lots   [back-central, authentifié JWT]
+    → BrazilBackendClient.create/update/delete()
+      → POST/PATCH/DELETE /api/lots   [back-brazil, port 3001]
+        → Prisma → PostgreSQL
+```
+
+Les données sont toujours **écrites dans la base du nœud pays** ; le central ne fait que
+relayer la requête après vérification du rôle (opérateur lié au pays concerné).
