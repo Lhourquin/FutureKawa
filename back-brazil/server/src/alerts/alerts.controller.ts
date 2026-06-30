@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AlertDto } from './dto/alert.dto';
 import { AlertsService } from './alerts.service';
@@ -17,5 +17,16 @@ export class AlertsController {
   @ApiOkResponse({ type: AlertDto, isArray: true })
   getAlerts(): Promise<AlertDto[]> {
     return this.alertsService.getAlerts();
+  }
+
+  @Post('send')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Envoyer les e-mails pour toutes les alertes actives',
+    description:
+      "Calcule les alertes actives et envoie un e-mail pour chacune. Utile pour tester le dispositif d'envoi sans attendre un message MQTT.",
+  })
+  sendAlertEmails(): Promise<{ sent: number }> {
+    return this.alertsService.sendActiveAlertEmails();
   }
 }
