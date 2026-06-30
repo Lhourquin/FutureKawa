@@ -46,6 +46,9 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Prisma engine cache (platform-specific binaries)
+.cache/
+
 # Runtime data
 pids
 *.pid
