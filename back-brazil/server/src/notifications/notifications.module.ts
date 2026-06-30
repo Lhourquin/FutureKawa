@@ -1,14 +1,14 @@
 import { Global, Module } from '@nestjs/common';
 import { NOTIFICATION_SERVICE } from './notification.service';
-import { SmtpMockNotificationService } from './smtp-mock.notification.service';
+import { NodemailerNotificationService } from './nodemailer.notification.service';
 
 @Global()
 @Module({
   providers: [
-    SmtpMockNotificationService,
+    NodemailerNotificationService,
     {
       provide: NOTIFICATION_SERVICE,
-      useExisting: SmtpMockNotificationService,
+      useExisting: NodemailerNotificationService,
     },
   ],
   exports: [NOTIFICATION_SERVICE],

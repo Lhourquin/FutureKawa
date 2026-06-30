@@ -50,6 +50,17 @@ services:
     networks:
       - futurekawa-br
 
+  # ── Serveur SMTP de test — Mailhog ──────────────────────────────────────────
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: futurekawa-br-mailhog
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MAILHOG_SMTP_PORT:-1025}:1025"   # SMTP (Nodemailer)
+      - "127.0.0.1:${MAILHOG_UI_PORT:-8025}:8025"     # Interface Web
+    networks:
+      - futurekawa-br
+
   # ── API REST NestJS (Back Brazil) ────────────────────────────────────────────
   api:
     build:
@@ -72,11 +83,16 @@ services:
       NODE_ENV: "production"
     ports:
       - "3001:3001"
+    environment:
+      SMTP_HOST: "mailhog"
+      SMTP_PORT: "1025"
     depends_on:
       postgres:
         condition: service_healthy
       mosquitto:
         condition: service_healthy
+      mailhog:
+        condition: service_started
     networks:
       - futurekawa-br
 
