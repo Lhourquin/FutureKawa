@@ -28,9 +28,9 @@ const char* country   = "brasil";
 const char* warehouse = "entrepotA";
 
 // Connexion WiFi et MQTT
-const char* ssid = "iPhone_de_Seth";//SFR_58A8
-const char* password = "monpin23";
-const char* mqtt_server_addr = "172.20.10.2";
+const char* ssid = "*************";
+const char* password = "*************";
+const char* mqtt_server_addr = "***********";
 WiFiClient espClient;
 PubSubClient client(espClient);
 
