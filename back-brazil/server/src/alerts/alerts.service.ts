@@ -128,4 +128,33 @@ export class AlertsService {
 
     return alerts.sort((a, b) => b.detectedAt.localeCompare(a.detectedAt));
   }
+
+  async sendActiveAlertEmails(): Promise<{ sent: number }> {
+    const lots = await this.lotRepository.findAll();
+    const now = this.clockRepository.now();
+    let sent = 0;
+
+    for (const lot of lots) {
+      const [latestTemp, latestHumidity] = await Promise.all([
+        this.measurementRepository.findLatestBySensor(lot.id, 'temperature'),
+        this.measurementRepository.findLatestBySensor(lot.id, 'humidity'),
+      ]);
+
+      const tempC = latestTemp?.value ?? null;
+      const humPct = latestHumidity?.value ?? null;
+
+      if (this.monitoringService.isWithinBrazilRange(tempC, humPct) === false) {
+        await this.notificationService.sendConditionAlert(lot, tempC!, humPct!);
+        sent++;
+      }
+
+      const storageDays = this.monitoringService.computeStorageDays(lot.storedAt, now);
+      if (storageDays > 365) {
+        await this.notificationService.sendExpiryAlert(lot, storageDays);
+        sent++;
+      }
+    }
+
+    return { sent };
+  }
 }
