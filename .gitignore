@@ -26,3 +26,6 @@ Thumbs.db
 .idea/
 .vscode/
 
+
+# Configuration locale du module ESP32 (identifiants Wi-Fi)
+futurkawa_capt/config.h
