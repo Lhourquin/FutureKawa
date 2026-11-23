@@ -32,7 +32,9 @@ services:
     container_name: futurekawa-br-mosquitto
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${MQTT_PORT:-1883}:1883"
+      # 127.0.0.1 par défaut : broker accessible uniquement depuis la machine.
+      # MQTT_BIND=0.0.0.0 dans .env pour qu'un ESP32 du réseau puisse s'y connecter.
+      - "${MQTT_BIND:-127.0.0.1}:${MQTT_PORT:-1883}:1883"
     volumes:
       - ./mosquitto/config:/mosquitto/config:ro
       - mosquitto_data:/mosquitto/data
