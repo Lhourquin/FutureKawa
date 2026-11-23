@@ -1,7 +1,7 @@
 # ─── FutureKawa — Back Brazil ────────────────────────────────────────────────
-# Contexte de build : racine du workspace pnpm (backend/)
+# Contexte de build : racine du workspace pnpm (racine du dépôt)
 # Ce Dockerfile est référencé depuis back-brazil/docker-compose.yml avec :
-#   context: ..                              (= backend/)
+#   context: ..                              (= racine du dépôt)
 #   dockerfile: back-brazil/server/Dockerfile
 # ─────────────────────────────────────────────────────────────────────────────
 FROM node:22-alpine
