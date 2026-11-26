@@ -4,27 +4,34 @@ Monorepo NestJS / React. Architecture distribuée : nœud Brésil ↔ back-centr
 
 ## Prérequis
 
-- Node.js ≥ 20
-- pnpm ≥ 9 (`npm i -g pnpm`)
-- Docker + Docker Compose
+- Node.js ≥ 20 (`node -v`)
+- pnpm 9 (`npm i -g pnpm@9`, même version que la CI Jenkins)
+- Docker + Docker Compose (Docker Desktop sous Windows / macOS)
+
+Les commandes ci-dessous fonctionnent dans un terminal bash/zsh (macOS, Linux) comme dans PowerShell (Windows).
+Toutes se lancent depuis la racine du dépôt.
+
+Ports utilisés : 3000, 3001, 5173, 5433, 1883, 1025, 8025. S'ils sont déjà pris (ex : Grafana utilise 3000 par défaut, un Mosquitto installé localement utilise 1883), libérer le port avant de lancer. Pour 1883, voir [Test réel avec l'ESP32](#test-réel-avec-lesp32).
 
 ---
 
 ## Démarrage rapide
 
-### 1. Lancer PostgreSQL + Mosquitto (Docker)
+### 1. Lancer PostgreSQL + Mosquitto + Mailhog (Docker)
 
 ```bash
 cd back-brazil
-docker compose up -d
+cp .env.example .env
+docker compose up -d postgres mosquitto mailhog
+docker compose ps
+cd ..
 ```
 
-Vérifier : `docker compose ps` — postgres et mosquitto doivent être `healthy`.
+postgres et mosquitto doivent être `healthy`. Le service `api` n'est pas lancé ici : l'API est démarrée avec pnpm à l'étape 4 (sinon conflit sur le port 3001). Pour lancer tout le nœud Brésil dans Docker, voir `back-brazil/README.md`.
 
 ### 2. Installer les dépendances
 
 ```bash
-# Depuis le dossier backend/
 pnpm install
 ```
 
@@ -32,24 +39,37 @@ pnpm install
 
 ```bash
 cd back-brazil/server
+cp .env.example .env
 pnpm prisma:db:push   # applique schema.prisma
 pnpm prisma:seed      # insère 2 lots + mesures de démonstration
+cd ../..
 ```
 
-### 4. Lancer les services (3 terminaux)
+### 4. Lancer les services (3 terminaux, depuis la racine du dépôt)
 
 ```bash
 # Terminal 1 — nœud Brésil (port 3001)
-cd back-brazil/server && pnpm start:dev
+cd back-brazil/server
+pnpm start:dev
 
 # Terminal 2 — back-central siège (port 3000)
-cd back-central && pnpm start:dev
+cd back-central
+pnpm start:dev
 
 # Terminal 3 — frontend (port 5173)
-cd frontend && pnpm dev
+cd frontend
+pnpm dev
 ```
 
 Ouvrir : **http://localhost:5173**
+
+Si la page de connexion se recharge sans message après avoir cliqué sur « Connexion », back-central ne tourne pas sur le port 3000 (vérifier le terminal 2, souvent une erreur `EADDRINUSE`).
+
+---
+
+## Test réel avec l'ESP32
+
+Par défaut, le broker n'accepte que les connexions de la machine elle-même (`127.0.0.1`). Pour qu'un vrai ESP32 envoie ses mesures, suivre la section **« Test réel avec un ESP32 »** de [`back-brazil/README.md`](back-brazil/README.md#test-réel-avec-un-esp32) (réseau, pare-feu Windows / macOS, configuration du firmware).
 
 ---
 
@@ -111,7 +131,7 @@ ESP32 → topic futurekawa/{country}/{warehouse}/sensors/{sensor}
          ↓
    AlertsService.handleMeasurementIngested()
      → vérif conditions (±3°C / ±2%) + péremption (>365 j)
-     → NotificationService.send*Alert() → log console (SMTP mock)
+     → NotificationService.send*Alert() → e-mail via Nodemailer (Mailhog en local : http://localhost:8025)
 ```
 
 ---
@@ -143,4 +163,4 @@ cd back-central && pnpm test
 - CQRS / Event Sourcing, Kafka/NATS : non justifiés au volume actuel
 - Strategy pattern (règles d'alerte) : non justifié à 2 règles
 - CASL : si les rôles deviennent granulaires
-- Email SMTP réel : remplacer `SmtpMockNotificationService` par impl Nodemailer
+- SMTP de production : Nodemailer envoie aujourd'hui vers Mailhog (test local) — configurer un serveur SMTP réel (TLS, authentification)

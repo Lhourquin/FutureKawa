@@ -4,6 +4,9 @@
 #include <time.h>
 #include <Wire.h>
 
+// Paramètres Wi-Fi et broker : copier config.example.h en config.h et le remplir
+// (config.h est ignoré par git pour ne pas publier les identifiants)
+#include "config.h"
 
 // Définition des pins
 #define DHT_PIN 25  // Capteur DHT pour température et humidité
@@ -27,10 +30,11 @@ const unsigned long dhtInterval_hum = 6000;  // 1 minute 5s pour les tests
 const char* country   = "brasil";
 const char* warehouse = "entrepotA";
 
-// Connexion WiFi et MQTT
-const char* ssid = "*************";
-const char* password = "*************";
-const char* mqtt_server_addr = "***********";
+// Connexion WiFi et MQTT (valeurs définies dans config.h)
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD;
+const char* mqtt_server_addr = MQTT_SERVER;
+const uint16_t mqtt_server_port = MQTT_PORT;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -99,7 +103,7 @@ void send_mqtt(const char* topic, const String& message) {
 
 // Configuration de MQTT
 void setup_mqtt() {
-  client.setServer(mqtt_server_addr, 1883);
+  client.setServer(mqtt_server_addr, mqtt_server_port);
   while (!client.connected()) {
     Serial.print("Tentative de connexion à MQTT...");
     if (client.connect("ESP32Client")) {
@@ -131,8 +135,8 @@ void capture_humidity() {
   if (!validateData("Humidity", humidity_value)) return;
   //Serial.print("Humidite: ");
   //Serial.print(humidity_value);
-  String payload = buildPayload(country, warehouse, "humidite", humidity_value, "%");
-  send_mqtt("futurekawa/brasil/entrepotA/sensors/humidite", payload);
+  String payload = buildPayload(country, warehouse, "humidity", humidity_value, "%");
+  send_mqtt("futurekawa/brasil/entrepotA/sensors/humidity", payload);
 }
 
 

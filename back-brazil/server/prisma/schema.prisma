@@ -21,7 +21,7 @@ model Lot {
   measurements  Measurement[]
 }
 
-// Une Measurement = un relevé d'un capteur (temperature OU humidite).
+// Une Measurement = un relevé d'un capteur (temperature OU humidity).
 // Chaque message MQTT produit exactement une ligne.
 model Measurement {
   id         String   @id @default(cuid())
